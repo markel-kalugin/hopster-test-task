@@ -3,10 +3,9 @@
  */
 angular
     .module('app')
-    .controller('RegisterController', RegisterController);
+    .controller('Register.IndexController', Controller);
 
-RegisterController.$inject = ['UserService', '$location', '$rootScope', 'FlashService'];
-function RegisterController(UserService, $location, $rootScope, FlashService) {
+function Controller(UserService, $location, $rootScope, FlashService) {
     var vm = this;
 
     vm.register = register;
