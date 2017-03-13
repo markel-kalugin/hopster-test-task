@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <title>Hopster Test Task</title>
+
+    <!-- Bootstrap-->
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Custom stylesheet -->
+    <link href="styles/app.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- Main app container -->
+    <div class="jumbotron">
+        <div class="container">
+            <div class="col-sm-8 col-sm-offset-2">
+                <ui-view></ui-view>
+            </div>
+        </div>
+    </div>
+
+    <!-- Angular scripts -->
+    <script src="node_modules/angular/angular.min.js"></script>
+    <script src="node_modules/angular-messages/angular-messages.min.js"></script>
+    <script src="node_modules/angular-ui-router/release/angular-ui-router.min.js"></script>
+    <script src="node_modules/ngstorage/ngStorage.min.js"></script>
+
+    <!-- Application scripts -->
+    <script src="scripts/app.js"></script>
+    <script src="scripts/app-services/authentication.service.js"></script>
+    <script src="scripts/home/home.controller.js"></script>
+    <script src="scripts/login/login.controller.js"></script>
+</body>
+</html>
