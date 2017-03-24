@@ -1,0 +1,13 @@
+<div class="col-md-6 col-md-offset-3">
+    <h2>User management</h2>
+    <div class="container" ng-repeat="person in persons">
+        <div class="row">
+            <div class="firstname col-sm-2">{{person.firstname}}</div>
+            <div class="lastname col-sm-2">{{person.lastname}}</div>
+            <div class="usermane col-sm-2">{{person.usermane}}</div>
+            <div class="email col-sm-2">{{person.email}}</div>
+            <div class="management col-sm-3"></div>
+        </div>
+    </div>
+    <div ng-if="vm.error" class="alert alert-danger">{{vm.error}}</div>
+</div>
