@@ -1,18 +1,26 @@
-from flask import Flask
-app = Flask(__name__)
-app.config['DEBUG'] = True
+import webapp2
+import logging
+import json
 
-# Note: We don't need to call run() since our application is embedded within
-# the App Engine WSGI application server.
-
-
-@app.route('/')
-def hello():
-    """Return a friendly HTTP greeting."""
-    return 'Hello World!'
+from scripts.handlers import (
+    AuthenticationHandler, UserManagementHandler
+)
 
 
-@app.errorhandler(404)
-def page_not_found(e):
-    """Return a custom 404 error."""
-    return 'Sorry, nothing at this URL.', 404
+def handle_error(request, response, exception):
+    response.headers.add_header('Content-Type', 'application/json')
+    result = {
+        'status': 'error'
+    }
+    response.write(json.dumps(result))
+
+config = {
+    'webapp2_extras.sessions': {'secret_key': 'my_secret'}
+}
+
+application = webapp2.WSGIApplication([
+    ('/api/v1/authenticate', AuthenticationHandler),
+    ('/api/v1/users', UserManagementHandler)
+], debug=True, config=config)
+application.error_handlers[404] = handle_error
+application.error_handlers[500] = handle_error
