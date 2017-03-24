@@ -2,7 +2,7 @@
  * Created by markel on 12.03.17.
  */
 angular
-    .module('app', ['ui.router', 'ngMessages', 'ngStorage'])
+    .module('app', ['ui.router', 'ngMessages', 'ngStorage', 'ngResource'])
     .config(config)
     .run(run);
 
@@ -28,6 +28,11 @@ function config($stateProvider, $urlRouterProvider) {
             url: '/register',
             templateUrl: 'views/register/register.view.html',
             controller: 'Register.IndexController',
+            controllerAs: 'vm'
+        }).state('user', {
+            url: '/user',
+            templateUrl: 'views/user/user.view.html',
+            controller: 'User.IndexController',
             controllerAs: 'vm'
         });
 }
