@@ -2,7 +2,7 @@
  * Created by markel on 12.03.17.
  */
 angular
-    .module('app', ['ui.router', 'ngMessages', 'ngStorage', 'ngResource'])
+    .module('app', ['ui.router', 'ngMessages', 'ngStorage', 'ngResource', 'smart-table', 'ui.bootstrap'])
     .config(config)
     .run(run);
 
