@@ -1,13 +1,39 @@
 <div class="col-md-6 col-md-offset-3">
     <h2>User management</h2>
-    <div class="container" ng-repeat="person in persons">
-        <div class="row">
-            <div class="firstname col-sm-2">{{person.firstname}}</div>
-            <div class="lastname col-sm-2">{{person.lastname}}</div>
-            <div class="usermane col-sm-2">{{person.usermane}}</div>
-            <div class="email col-sm-2">{{person.email}}</div>
-            <div class="management col-sm-3"></div>
-        </div>
+    <div class="row well">
+        <button type="button" class="btn btn-info pull-right" ng-click="vm.addRecord()">
+            <i class="glyphicon glyphicon-plus"></i> Add New Employee</button>
     </div>
-    <div ng-if="vm.error" class="alert alert-danger">{{vm.error}}</div>
+    <table class="table table-hover table-bordered">
+        <thead>
+            <tr>
+                <th>Firstname</th>
+                <th>Lastname</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Management</th>
+            </tr>
+        </thead>
+        <tbody ng-repeat="person in vm.persons">
+            <tr>
+                <td>{{person.firstname}}</td>
+                <td>{{person.lastname}}</td>
+                <td>{{person.username}}</td>
+                <td>{{person.email}}</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-info" ng-click="vm.viewRecord(person.id)">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                        <button type="button" class="btn btn-default" ng-click="vm.editRecord(person.id)">
+                            <i class="glyphicon glyphicon-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" ng-click="vm.deleteRecord(person.id)">
+                            <i class="glyphicon glyphicon-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
