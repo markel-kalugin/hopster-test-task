@@ -1,4 +1,4 @@
-import hashlib, uuid
+import hashlib
 
 from google.appengine.ext import db
 
@@ -6,7 +6,7 @@ from model import PersonModel
 
 
 class Person(object):
-    def save_person(self, firstname, lastname, username, email, password, id):
+    def save_person(self, firstname, lastname, username, email, password):
         person = PersonModel()
         person.firstname = firstname
         person.lastname = lastname
@@ -15,37 +15,54 @@ class Person(object):
         person.password = self.encrypt_password(password)
         person.put()
 
-    def delete_person(self, person_ids):
-        if len(person_ids) > 0:
-            for person_id in person_ids:
-                person_k = db.Key.from_path('PersonModel', long(person_id))
-                person = db.get(person_k)
-                db.delete(person_k)
+    def update_person(self, firstname, lastname, username, email, password, id):
+        person = PersonModel.get_by_id(long(id))
+        person.firstname = firstname
+        person.lastname = lastname
+        person.username = username
+        person.email = email
+        person.password = self.encrypt_password(password)
+        person.put()
+
+    def delete_person(self, id):
+        if id > 0:
+            person_key = db.Key.from_path('PersonModel', long(id))
+            db.delete(person_key)
+            return True
+        else:
+            return False
+
+    def get_person_by_id(self, id):
+        person = PersonModel.get_by_id(long(id))
+        result = {
+            'id': person.key().id_or_name(),
+            'firstname': person.firstname,
+            'lastname': person.lastname,
+            'username': person.username,
+            'email': person.email,
+        }
+        return result
+
+    def list_person(self):
+        result = []
+        persons = PersonModel.all()
+        for person in persons:
+            result.append(
+                {
+                    'id': person.key().id_or_name(),
+                    'firstname': person.firstname,
+                    'lastname': person.lastname,
+                    'username': person.username,
+                    'email': person.email,
+                }
+            )
+        return result
 
     def auth_list_person(self):
         result = []
         person = PersonModel.all()
         for i in person:
-            result.append(
-                {
-                    'username': i.username,
-                    'password': i.password,
-                }
-            )
-        return result
-
-    def list_person(self):
-        result = []
-        person = PersonModel.all()
-        for i in person:
-            result.append(
-                {
-                    'firstname': i.firstname,
-                    'lastname': i.lastname,
-                    'username': i.username,
-                    'email': i.email,
-                }
-            )
+            result.append([i.username, i.password])
         return result
 
     def encrypt_password(self, password):

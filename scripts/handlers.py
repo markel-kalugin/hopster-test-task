@@ -48,13 +48,10 @@ class BaseHandler(webapp2.RedirectHandler):
 
 
 class AuthenticationHandler(BaseHandler):
-    # def get(self):
-    #     self.response.out.write('Hello, webapp2 World!')
-
     def post(self):
         params = json.loads(self.request.body)
         person = Person()
-        person_list = person.list_person()
+        person_list = person.auth_list_person()
         if [params['username'], person.encrypt_password(params['password'])] in person_list:
             token = jwt.encode(
                 {
@@ -75,19 +72,18 @@ class AuthenticationHandler(BaseHandler):
                 error_message='Person does not exists'
             )
 
-    # def put(self):
-    #     self.response.out.write('Hello, webapp2 World!')
-
-    # def delete(self):
-    #     self.response.out.write('Hello, webapp2 World!')
-
 
 class UserManagementHandler(BaseHandler):
     def get(self, *args, **kwargs):
         try:
-            self.response_factory(
-                body=Person().list_person()
-            )
+            if self.request.get('id'):
+                self.response_factory(
+                    body=Person().get_person_by_id(self.request.get('id'))
+                )
+            else:
+                self.response_factory(
+                    body=Person().list_person()
+                )
         except webapp2.HTTPException as e:
             self.response_factory(
                 status='error',
@@ -109,8 +105,7 @@ class UserManagementHandler(BaseHandler):
                 input_lastname,
                 input_username,
                 input_email,
-                input_password,
-                0
+                input_password
             )
             logging.info('User with username {} was created.'.format(input_username))
             self.response_factory()
@@ -121,11 +116,42 @@ class UserManagementHandler(BaseHandler):
                 error_message=e.message
             )
 
-    # def put(self):
-    #     print('PUT', self.request)
-    #     self.response.out.write(json.dumps('Update user'))
+    def put(self):
+        try:
+            params = json.loads(self.request.body)
+            input_id = params['id']
+            input_firstname = params['firstname']
+            input_lastname = params['lastname']
+            input_username = params['username']
+            input_email = params['email']
+            input_password = params['password']
+            person = Person()
+            person.update_person(
+                input_firstname,
+                input_lastname,
+                input_username,
+                input_email,
+                input_password,
+                input_id
+            )
+            self.response_factory()
+        except webapp2.HTTPException as e:
+            self.response_factory(
+                status='error',
+                status_code=407,
+                error_message=e.message
+            )
 
-    # def delete(self):
-    #     print('DELETE', self.request)
-    #     self.response.out.write(json.dumps('Delete user'))
+    def delete(self):
+        try:
+            if self.request.get('id'):
+                self.response_factory(
+                    body=Person().delete_person(self.request.get('id'))
+                )
+        except webapp2.HTTPException as e:
+            self.response_factory(
+                status='error',
+                status_code=407,
+                error_message=e.message
+            )
 
