@@ -1,0 +1,21 @@
+<div class="clearfix">
+	<div class="modal-header model-grey-color">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="closeModal()"><span aria-hidden="true">×</span></button>
+		<h4 class="modal-title">View : {{person.firstname}}</h4>
+	</div>
+	<div class="modal-body">
+		<dl class="dl-horizontal">
+			<dt>Firstname</dt>
+			<dd>{{person.firstname}}</dd>
+			<dt>Lastname</dt>
+			<dd>{{person.lastname}}</dd>
+			<dt>Username</dt>
+			<dd>{{person.username}}</dd>
+			<dt>Email</dt>
+			<dd>{{person.email}}</dd>
+		</dl>
+	</div>
+		<div class="modal-footer">
+		<button class="btn btn-danger" data-dismiss="modal" ng-click="closeModal()"><i class="fa fa-close"></i> Close</button>
+	</div>
+</div>
