@@ -10,7 +10,17 @@ import time
 
 
 class BaseHandler(webapp2.RedirectHandler):
+    """
+    It is necessary to redefine the parameters of responses.
+    """
+
     def dispatch(self):
+        """
+        Updates header of HTTP packages and stored session.
+
+        :return: None
+        :rtype: None
+        """
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Access-Control-Allow-Credentials'] = 'true'
         self.response.headers['Access-Control-Allow-Methods'] = 'GET,HEAD,OPTIONS,POST,PUT'
@@ -31,26 +41,50 @@ class BaseHandler(webapp2.RedirectHandler):
             # Save all sessions.
             self.session_store.save_sessions(self.response)
 
-
     @webapp2.cached_property
     def session(self):
-        # Returns a session using the default cookie key.
+        """
+        Returns a session using the default cookie key.
+
+        :return: None
+        :rtype: None
+        """
         return self.session_store.get_session()
 
     def response_factory(self, status='OK', body=None, status_code=200, error_message=None):
+        """
+        For unification response body factory.
+
+        :param status: str
+        :param body: any
+        :param status_code: int
+        :param error_message: str
+        :return: None
+        :rtype: None
+        """
         self.response.out.write(json.dumps(
-                {
-                    'status': status,
-                    'body': body,
-                    'status_code': status_code,
-                    'error_message': error_message
-                }
-            )
+            {
+                'status': status,
+                'body': body,
+                'status_code': status_code,
+                'error_message': error_message
+            }
+        )
         )
 
 
 class AuthenticationHandler(BaseHandler):
+    """
+    Authontication handler
+    """
+
     def post(self):
+        """
+        Builds token according to current timestamp, secret key and user credentials.
+
+        :return: None
+        :rtype: None
+        """
         params = json.loads(self.request.body)
         person = Person()
         person_list = person.auth_list_person()
@@ -75,17 +109,36 @@ class AuthenticationHandler(BaseHandler):
             )
 
 
-class UserManagementHandler(BaseHandler):
-    def get(self, *args, **kwargs):
+class CRUDHandler(BaseHandler):
+    """
+    Due to the identity of the requests handlers logic, all handlers
+    are assembled in this class to reduce the lines of code.
+    """
+
+    def get_handler(self, class_helper):
+        """
+        Wrapper for HTTP request handler with method GET was created for upping of abstract level.
+
+        :param class class_helper: is a class which processing some business entity.
+        :return: None
+        :rtype: None
+        """
         try:
             if self.request.get('id'):
                 self.response_factory(
-                    body=Person().get_person_by_id(self.request.get('id'))
+                    body=class_helper().get_by_id(self.request.get('id'))
                 )
+                logging.info('Entity with name {entity_name} was got successfully by id = {id}.'.format(
+                    entity_name=class_helper.__name__,
+                    id=self.request.get('id')
+                ))
             else:
                 self.response_factory(
-                    body=Person().list_person()
+                    body=class_helper().list()
                 )
+                logging.info('Entity with name {entity_name} was got successfully.'.format(
+                    entity_name=class_helper.__name__
+                ))
         except webapp2.HTTPException as e:
             self.response_factory(
                 status='error',
@@ -93,12 +146,21 @@ class UserManagementHandler(BaseHandler):
                 error_message=e.message
             )
 
-    def post(self):
+    def post_handler(self, class_helper):
+        """
+        Wrapper for HTTP request handler with method POST was created for upping of abstract level.
+
+        :param class class_helper: is a class which processing some business entity.
+        :return: None
+        :rtype: None
+        """
         try:
             params = json.loads(self.request.body)
-            person = Person()
-            person.save_person(**params)
-            logging.info('User with username {} was created.'.format(params['username']))
+            entity = class_helper()
+            entity.save(**params)
+            logging.info('Entity with name {entity_name} was created successfully.'.format(
+                entity_name=class_helper.__name__
+            ))
             self.response_factory()
         except webapp2.HTTPException as e:
             self.response_factory(
@@ -107,11 +169,21 @@ class UserManagementHandler(BaseHandler):
                 error_message=e.message
             )
 
-    def put(self):
+    def put_handler(self, class_helper):
+        """
+        Wrapper for HTTP request handler with method PUT was created for upping of abstract level.
+
+        :param class class_helper: is a class which processing some business entity.
+        :return: None
+        :rtype: None
+        """
         try:
             params = json.loads(self.request.body)
-            person = Person()
-            person.update_person(**params)
+            entity = class_helper()
+            entity.update(**params)
+            logging.info('Entity with name {entity_name} was updated successfully.'.format(
+                entity_name=class_helper.__name__
+            ))
             self.response_factory()
         except webapp2.HTTPException as e:
             self.response_factory(
@@ -120,12 +192,22 @@ class UserManagementHandler(BaseHandler):
                 error_message=e.message
             )
 
-    def delete(self):
+    def delete_handler(self, class_helper):
+        """
+        Wrapper for HTTP request handler with method DELETE was created for upping of abstract level.
+
+        :param class class_helper: is a class which processing some business entity.
+        :return: None
+        :rtype: None
+        """
         try:
             if self.request.get('id'):
                 self.response_factory(
-                    body=Person().delete_person(self.request.get('id'))
+                    body=class_helper().delete(self.request.get('id'))
                 )
+                logging.info('Entity with name {entity_name} was deleted successfully.'.format(
+                    entity_name=class_helper.__name__
+                ))
         except webapp2.HTTPException as e:
             self.response_factory(
                 status='error',
@@ -134,349 +216,323 @@ class UserManagementHandler(BaseHandler):
             )
 
 
-class CompanyHandler(BaseHandler):
+class UserManagementHandler(CRUDHandler):
+    """
+    User Management handler
+    """
+    helper = Person
+
     def get(self, *args, **kwargs):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=Company().get_company_by_id(self.request.get('id'))
-                )
-            else:
-                self.response_factory(
-                    body=Company().list_company()
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request User Management endpoint with HTTP method GET.
+
+        :param set args: unnamed arguments
+        :param dict kwargs: named arguments
+
+        :return: None
+        :rtype: None
+        """
+        self.get_handler(self.helper)
 
     def post(self):
-        try:
-            params = json.loads(self.request.body)
-            company = Company()
-            company.save_company(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request User Management endpoint with HTTP method POST.
+
+        :return: None
+        :rtype: None
+        """
+        self.post_handler(self.helper)
 
     def put(self):
-        try:
-            params = json.loads(self.request.body)
-            company = Company()
-            company.update_company(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request User Management endpoint with HTTP method PUT.
+
+        :return: None
+        :rtype: None
+        """
+        self.put_handler(self.helper)
 
     def delete(self):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=Company().delete_company(self.request.get('id'))
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request User Management endpoint with HTTP method DELETE.
+
+        :return: None
+        :rtype: None
+        """
+        self.delete_handler(self.helper)
 
 
-class CompanyBrandHandler(BaseHandler):
+class CompanyHandler(CRUDHandler):
+    """
+    Company handler
+    """
+    helper = Company
+
     def get(self, *args, **kwargs):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=CompanyBrands().get_company_brand_by_id(self.request.get('id'))
-                )
-            else:
-                self.response_factory(
-                    body=CompanyBrands().list_company_brand()
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company endpoint with HTTP method GET.
+
+        :param set args: unnamed arguments
+        :param dict kwargs: named arguments
+
+        :return: None
+        :rtype: None
+        """
+        self.get_handler(self.helper)
 
     def post(self):
-        try:
-            params = json.loads(self.request.body)
-            company_brand = CompanyBrands()
-            company_brand.save_company_brand(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company endpoint with HTTP method POST.
+
+        :return: None
+        :rtype: None
+        """
+        self.post_handler(self.helper)
 
     def put(self):
-        try:
-            params = json.loads(self.request.body)
-            company_brand = CompanyBrands()
-            company_brand.update_company_brand(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company endpoint with HTTP method PUT.
+
+        :return: None
+        :rtype: None
+        """
+        self.put_handler(self.helper)
 
     def delete(self):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=CompanyBrands().delete_company_brand(self.request.get('id'))
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company endpoint with HTTP method DELETE.
+
+        :return: None
+        :rtype: None
+        """
+        self.delete_handler(self.helper)
 
 
-class ProductCategoryHandler(BaseHandler):
+class CompanyBrandHandler(CRUDHandler):
+    """
+    Company Brands handler
+    """
+    helper = CompanyBrands
+
     def get(self, *args, **kwargs):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=ProductCategory().get_product_category_by_id(self.request.get('id'))
-                )
-            else:
-                self.response_factory(
-                    body=ProductCategory().list_product_category()
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company Brands endpoint with HTTP method GET.
+
+        :param set args: unnamed arguments
+        :param dict kwargs: named arguments
+
+        :return: None
+        :rtype: None
+        """
+        self.get_handler(self.helper)
 
     def post(self):
-        try:
-            params = json.loads(self.request.body)
-            product_category = ProductCategory()
-            product_category.save_product_category(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company Brands endpoint with HTTP method POST.
+
+        :return: None
+        :rtype: None
+        """
+        self.post_handler(self.helper)
 
     def put(self):
-        try:
-            params = json.loads(self.request.body)
-            product_category = ProductCategory()
-            product_category.update_product_category(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company Brands endpoint with HTTP method PUT.
+
+        :return: None
+        :rtype: None
+        """
+        self.put_handler(self.helper)
 
     def delete(self):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=ProductCategory().delete_product_category(self.request.get('id'))
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Company Brands endpoint with HTTP method DELETE.
+
+        :return: None
+        :rtype: None
+        """
+        self.delete_handler(self.helper)
 
 
-class ProductHandler(BaseHandler):
+class ProductCategoryHandler(CRUDHandler):
+    """
+    Product Category handler
+    """
+    helper = ProductCategory
+
     def get(self, *args, **kwargs):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=Product().get_product_by_id(self.request.get('id'))
-                )
-            else:
-                self.response_factory(
-                    body=Product().list_product()
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product Category endpoint with HTTP method GET.
+
+        :param set args: unnamed arguments
+        :param dict kwargs: named arguments
+
+        :return: None
+        :rtype: None
+        """
+        self.get_handler(self.helper)
 
     def post(self):
-        try:
-            params = json.loads(self.request.body)
-            product = Product()
-            product.save_product(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product Category endpoint with HTTP method POST.
+
+        :return: None
+        :rtype: None
+        """
+        self.post_handler(self.helper)
 
     def put(self):
-        try:
-            params = json.loads(self.request.body)
-            product = Product()
-            product.update_product(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product Category endpoint with HTTP method PUT.
+
+        :return: None
+        :rtype: None
+        """
+        self.put_handler(self.helper)
 
     def delete(self):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=Product().delete_product(self.request.get('id'))
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product Category endpoint with HTTP method DELETE.
+
+        :return: None
+        :rtype: None
+        """
+        self.delete_handler(self.helper)
 
 
-class PhoneNumberTypeHandler(BaseHandler):
+class ProductHandler(CRUDHandler):
+    """
+    Product handler
+    """
+    helper = Product
+
     def get(self, *args, **kwargs):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=PhoneNumberType().get_phone_number_type_by_id(self.request.get('id'))
-                )
-            else:
-                self.response_factory(
-                    body=PhoneNumberType().list_phone_number_type()
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product endpoint with HTTP method GET.
+
+        :param set args: unnamed arguments
+        :param dict kwargs: named arguments
+
+        :return: None
+        :rtype: None
+        """
+        self.get_handler(self.helper)
 
     def post(self):
-        try:
-            params = json.loads(self.request.body)
-            product = PhoneNumberType()
-            product.save_phone_number_type(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product endpoint with HTTP method POST.
+
+        :return: None
+        :rtype: None
+        """
+        self.post_handler(self.helper)
 
     def put(self):
-        try:
-            params = json.loads(self.request.body)
-            product = PhoneNumberType()
-            product.update_phone_number_type(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product endpoint with HTTP method PUT.
+
+        :return: None
+        :rtype: None
+        """
+        self.put_handler(self.helper)
 
     def delete(self):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=PhoneNumberType().delete_phone_number_type(self.request.get('id'))
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Product endpoint with HTTP method DELETE.
+
+        :return: None
+        :rtype: None
+        """
+        self.delete_handler(self.helper)
 
 
-class ManufacturerHandler(BaseHandler):
+class PhoneNumberTypeHandler(CRUDHandler):
+    """
+    Phone Number Type handler
+    """
+    helper = PhoneNumberType
+
     def get(self, *args, **kwargs):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=Manufacturer().get_manufacturer_by_id(self.request.get('id'))
-                )
-            else:
-                self.response_factory(
-                    body=Manufacturer().list_manufacturer()
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Phone Number Type endpoint with HTTP method GET.
+
+        :param set args: unnamed arguments
+        :param dict kwargs: named arguments
+
+        :return: None
+        :rtype: None
+        """
+        self.get_handler(self.helper)
 
     def post(self):
-        try:
-            params = json.loads(self.request.body)
-            product = Manufacturer()
-            product.save_manufacturer(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Phone Number Type endpoint with HTTP method POST.
+
+        :return: None
+        :rtype: None
+        """
+        self.post_handler(self.helper)
 
     def put(self):
-        try:
-            params = json.loads(self.request.body)
-            product = Manufacturer()
-            product.update_manufacturer(**params)
-            self.response_factory()
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Phone Number Type endpoint with HTTP method PUT.
+
+        :return: None
+        :rtype: None
+        """
+        self.put_handler(self.helper)
 
     def delete(self):
-        try:
-            if self.request.get('id'):
-                self.response_factory(
-                    body=Manufacturer().delete_manufacturer(self.request.get('id'))
-                )
-        except webapp2.HTTPException as e:
-            self.response_factory(
-                status='error',
-                status_code=407,
-                error_message=e.message
-            )
+        """
+        Handler for request Phone Number Type endpoint with HTTP method DELETE.
+
+        :return: None
+        :rtype: None
+        """
+        self.delete_handler(self.helper)
+
+
+class ManufacturerHandler(CRUDHandler):
+    """
+    Manufacturer handler
+    """
+    helper = Manufacturer
+
+    def get(self, *args, **kwargs):
+        """
+        Handler for request Manufacturer endpoint with HTTP method GET.
+
+        :param set args: unnamed arguments
+        :param dict kwargs: named arguments
+
+        :return: None
+        :rtype: None
+        """
+        self.get_handler(self.helper)
+
+    def post(self):
+        """
+        Handler for request Manufacturer endpoint with HTTP method POST.
+
+        :return: None
+        :rtype: None
+        """
+        self.post_handler(self.helper)
+
+    def put(self):
+        """
+        Handler for request Manufacturer endpoint with HTTP method PUT.
+
+        :return: None
+        :rtype: None
+        """
+        self.put_handler(self.helper)
+
+    def delete(self):
+        """
+        Handler for request Manufacturer endpoint with HTTP method DELETE.
+
+        :return: None
+        :rtype: None
+        """
+        self.delete_handler(self.helper)
