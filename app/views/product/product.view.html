@@ -1,0 +1,38 @@
+<ng-include src="'views/system/sidebar.html'"></ng-include>
+<h2>Products</h2>
+<div class="row well">
+    <button type="button" class="btn btn-info pull-right" ng-click="vm.addRecord()">
+        <i class="glyphicon glyphicon-plus"></i> Add New Employee</button>
+</div>
+<table class="table table-hover table-bordered">
+    <thead>
+        <tr>
+            <th class="col-sm-2">Price</th>
+            <th class="col-sm-2">Description</th>
+            <th class="col-sm-3">Brand</th>
+            <th class="col-sm-3">Category</th>
+            <th class="col-sm-2">Management</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="product in vm.products">
+            <td>{{product.price}}</td>
+            <td>{{product.description}}</td>
+            <td>{{product.brand}}</td>
+            <td>{{product.category}}</td>
+            <td class="">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-info" ng-click="vm.viewRecord(product.id)">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="vm.editRecord(product.id)">
+                        <i class="glyphicon glyphicon-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" ng-click="vm.deleteRecord(product.id)">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
