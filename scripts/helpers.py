@@ -257,3 +257,49 @@ class Product(object):
             )
         return result
 
+
+class PhoneNumberType(object):
+    def save_phone_number_type(self, name, description):
+        phone_number_type = RefPhoneNumbersTypesModel()
+        phone_number_type.name = name
+        phone_number_type.description = description
+        phone_number_type.put()
+
+    def update_phone_number_type(self, name, description, id):
+        phone_number_type = RefPhoneNumbersTypesModel().get_by_id(long(id))
+        phone_number_type.name = name
+        phone_number_type.description = description
+        phone_number_type.put()
+
+    def delete_phone_number_type(self, id):
+        if id > 0:
+            phone_number_type_key = db.Key.from_path('RefPhoneNumbersTypesModel', long(id))
+            db.delete(phone_number_type_key)
+            return True
+        else:
+            return False
+
+    def get_phone_number_type_by_id(self, id):
+        phone_number_type = RefPhoneNumbersTypesModel.get_by_id(long(id))
+        result = {
+            'id': phone_number_type.key().id_or_name(),
+            'name': phone_number_type.name,
+            'description': phone_number_type.description,
+            'phones': [phone_type.name for phone_type in
+                       PhoneNumbersModel.all().filter('phone_type = ', phone_number_type.key())]
+        }
+        return result
+
+    def list_phone_number_type(self):
+        result = []
+        companies = RefPhoneNumbersTypesModel.all()
+        for phone_number_type in companies:
+            result.append(
+                {
+                    'id': phone_number_type.key().id_or_name(),
+                    'name': phone_number_type.name,
+                    'description': phone_number_type.description,
+                }
+            )
+        return result
+
