@@ -1,0 +1,17 @@
+<div class="clearfix">
+	<div class="modal-header model-grey-color">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="closeModal()"><span aria-hidden="true">×</span></button>
+		<h4 class="modal-title">View : {{product_category.name}}</h4>
+	</div>
+	<div class="modal-body">
+		<dl class="dl-horizontal">
+			<dt>Name</dt>
+			<dd>{{product_category.name}}</dd>
+			<dt>Description</dt>
+			<dd>{{product_category.description}}</dd>
+		</dl>
+	</div>
+		<div class="modal-footer">
+		<button class="btn btn-danger" data-dismiss="modal" ng-click="closeModal()"><i class="fa fa-close"></i> Close</button>
+	</div>
+</div>
