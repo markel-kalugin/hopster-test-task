@@ -35,6 +35,3 @@ See [CONTRIB.md](CONTRIB.md)
 
 ## Licensing
 See [LICENSE](LICENSE)
-
-## Author
-Logan Henriquez and Johan Euphrosine
