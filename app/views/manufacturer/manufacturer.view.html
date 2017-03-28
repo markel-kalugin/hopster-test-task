@@ -1,0 +1,36 @@
+<ng-include src="'views/system/sidebar.html'"></ng-include>
+<h2>Manufacturers</h2>
+<div class="row well">
+    <button type="button" class="btn btn-info pull-right" ng-click="vm.addRecord()">
+        <i class="glyphicon glyphicon-plus"></i> Add Manufacturer</button>
+</div>
+<table class="table table-hover table-bordered">
+    <thead>
+        <tr>
+            <th class="col-sm-2">Details</th>
+            <th class="col-sm-2">Phone Number</th>
+            <th class="col-sm-3">Phone Number Type</th>
+            <th class="col-sm-2">Management</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="manufacturer in vm.manufacturers">
+            <td>{{manufacturer.details}}</td>
+            <td>{{manufacturer.phone_number[0]}}</td>
+            <td>{{manufacturer.phone_number_type[0].name}}</td>
+            <td class="">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-info" ng-click="vm.viewRecord(manufacturer.id)">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="vm.editRecord(manufacturer.id)">
+                        <i class="glyphicon glyphicon-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" ng-click="vm.deleteRecord(manufacturer.id)">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
