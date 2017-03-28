@@ -1,0 +1,33 @@
+{
+  "name": "hopster-test-task",
+  "authors": [
+    "markel.kalugin <markel.kalugin@gmail.com>"
+  ],
+  "description": "",
+  "main": "index.html",
+  "keywords": [
+    "hopster"
+  ],
+  "license": "MIT",
+  "homepage": "https://hopstertest-161207.appspot.com/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "chosen": "1.7.0",
+    "angular": "1.5.3",
+    "angular-messages": "1.5.3",
+    "angular-resource": "1.5.3",
+    "angular-smart-table": "2.1.8",
+    "angular-ui-router": "0.4.2",
+    "bootstrap": "3.3.7",
+    "font-awesome": "4.7.0",
+    "ngstorage": "0.3.11",
+    "angular-bootstrap": "^2.5.0",
+    "angular-bootstrap-chosen": "^1.0.10"
+  }
+}
