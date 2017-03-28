@@ -1,8 +1,6 @@
 import hashlib
 
-from google.appengine.ext import db
-
-from model import PersonModel
+from model import *
 
 
 class Person(object):
@@ -67,3 +65,50 @@ class Person(object):
 
     def encrypt_password(self, password):
         return hashlib.sha512(password).hexdigest()
+
+
+class Company(object):
+    def save_company(self, name, description):
+        company = CompanyModel()
+        company.name = name
+        company.description = description
+        company.put()
+
+    def update_company(self, name, description, id):
+        company = CompanyModel().get_by_id(long(id))
+        company.name = name
+        company.description = description
+        company.put()
+
+    def delete_company(self, id):
+        if id > 0:
+            company_key = db.Key.from_path('CompanyModel', long(id))
+            db.delete(company_key)
+            return True
+        else:
+            return False
+
+    def get_company_by_id(self, id):
+        company = CompanyModel.get_by_id(long(id))
+        result = {
+            'id': company.key().id_or_name(),
+            'name': company.name,
+            'description': company.description,
+            'brands': [brand.name for brand in CompanyBrandsModel.all().filter('company = ', company.key())]
+        }
+        return result
+
+    def list_company(self):
+        result = []
+        companies = CompanyModel.all()
+        for company in companies:
+            result.append(
+                {
+                    'id': company.key().id_or_name(),
+                    'name': company.name,
+                    'description': company.description,
+                }
+            )
+        return result
+
+
