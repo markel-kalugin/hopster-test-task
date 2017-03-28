@@ -303,3 +303,88 @@ class PhoneNumberType(object):
             )
         return result
 
+
+class Manufacturer(object):
+    def save_manufacturer(self, details, phone_number, phone_number_type, products_manufacturer):
+        manufacturer = ManufacturerModel()
+        manufacturer.details = details
+        manufacturer.put()
+        PhoneNumbersModel(
+            manufacturer=manufacturer.key(),
+            type=RefPhoneNumbersTypesModel.get_by_id(long(phone_number_type['id'])),
+            phone=phone_number
+        ).put()
+        for _products_manufacturer in products_manufacturer:
+            ProductManufacturersModel(
+                product=ProductModel.get_by_id(long(_products_manufacturer['id'])),
+                manufacturer=manufacturer.key()
+            ).put()
+
+    def update_manufacturer(self, details, phone_number, phone_number_type, products_manufacturer, id):
+        manufacturer = ManufacturerModel.get_by_id(long(id))
+        manufacturer.details = details
+        manufacturer.put()
+        phone_numbers_keys = [_phone_number.key() for _phone_number in
+                              PhoneNumbersModel.all().filter('manufacturer = ', manufacturer.key())]
+        db.delete(phone_numbers_keys)
+        product_manufacturer_relations_keys = [product_manufacturer_relation.key() for product_manufacturer_relation in
+                                               ProductManufacturersModel.all().filter('manufacturer =', manufacturer)]
+        db.delete(product_manufacturer_relations_keys)
+        PhoneNumbersModel(
+            manufacturer=manufacturer.key(),
+            type=RefPhoneNumbersTypesModel.get_by_id(long(phone_number_type['id'])),
+            phone=phone_number
+        ).put()
+        for _products_manufacturer in products_manufacturer:
+            ProductManufacturersModel(
+                product=ProductModel.get_by_id(long(_products_manufacturer['id'])),
+                manufacturer=manufacturer.key()
+            ).put()
+
+    def delete_manufacturer(self, id):
+        if id > 0:
+            manufacturer_key = db.Key.from_path('ManufacturerModel', long(id))
+            db.delete(manufacturer_key)
+            return True
+        else:
+            return False
+
+    def get_manufacturer_by_id(self, id):
+        manufacturer = ManufacturerModel.get_by_id(long(id))
+        phone_numbers = PhoneNumbersModel.all().filter('manufacturer = ', manufacturer.key())
+        product_manufacturer_relations_keys = ProductManufacturersModel.all().filter('manufacturer =', manufacturer)
+        products_keys = [ProductManufacturersModel.product.get_value_for_datastore(relations_key) for relations_key in
+                         product_manufacturer_relations_keys]
+        products = db.get(products_keys)
+        result = {
+            'id': manufacturer.key().id_or_name(),
+            'details': manufacturer.details,
+            'phone_number': [phone_number.phone for phone_number in phone_numbers],
+            'phone_number_type': [
+                {
+                    'id': phone_number.type.key().id_or_name(),
+                    'name': phone_number.type.name,
+                } for phone_number in phone_numbers],
+            'products': ['{} - {} - {}'.format(product.category.name, product.brand.name, product.price) for product in
+                         products],
+        }
+        return result
+
+    def list_manufacturer(self):
+        result = []
+        manufacturers = ManufacturerModel.all()
+        for manufacturer in manufacturers:
+            phone_numbers = PhoneNumbersModel.all().filter('manufacturer = ', manufacturer.key())
+            result.append(
+                {
+                    'id': manufacturer.key().id_or_name(),
+                    'details': manufacturer.details,
+                    'phone_number': [phone_number.phone for phone_number in phone_numbers],
+                    'phone_number_type': [
+                        {
+                            'id': phone_number.type.key().id_or_name(),
+                            'name': phone_number.type.name,
+                        } for phone_number in phone_numbers],
+                }
+            )
+        return result
