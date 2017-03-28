@@ -305,8 +305,6 @@ class CompanyBrands(object):
                     'company': company_brand.company.name,
                 }
             )
-        import logging
-        logging.info('{}'.format(result))
         return result
 
 

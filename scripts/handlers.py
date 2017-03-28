@@ -63,13 +63,13 @@ class BaseHandler(webapp2.RedirectHandler):
         :rtype: None
         """
         self.response.out.write(json.dumps(
-            {
-                'status': status,
-                'body': body,
-                'status_code': status_code,
-                'error_message': error_message
-            }
-        )
+                {
+                    'status': status,
+                    'body': body,
+                    'status_code': status_code,
+                    'error_message': error_message
+                }
+            )
         )
 
 
@@ -136,7 +136,7 @@ class CRUDHandler(BaseHandler):
                 self.response_factory(
                     body=class_helper().list()
                 )
-                logging.info('Entity with name {entity_name} was got successfully.'.format(
+                logging.info('List of entities with name {entity_name} was got successfully.'.format(
                     entity_name=class_helper.__name__
                 ))
         except webapp2.HTTPException as e:
