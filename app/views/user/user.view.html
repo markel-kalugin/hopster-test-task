@@ -1,39 +1,38 @@
-<div class="col-md-6 col-md-offset-3">
-    <h2>User management</h2>
-    <div class="row well">
-        <button type="button" class="btn btn-info pull-right" ng-click="vm.addRecord()">
-            <i class="glyphicon glyphicon-plus"></i> Add New Employee</button>
-    </div>
-    <table class="table table-hover table-bordered">
-        <thead>
-            <tr>
-                <th>Firstname</th>
-                <th>Lastname</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Management</th>
-            </tr>
-        </thead>
-        <tbody ng-repeat="person in vm.persons">
-            <tr>
-                <td>{{person.firstname}}</td>
-                <td>{{person.lastname}}</td>
-                <td>{{person.username}}</td>
-                <td>{{person.email}}</td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-info" ng-click="vm.viewRecord(person.id)">
-                            <i class="glyphicon glyphicon-search"></i>
-                        </button>
-                        <button type="button" class="btn btn-default" ng-click="vm.editRecord(person.id)">
-                            <i class="glyphicon glyphicon-pencil"></i>
-                        </button>
-                        <button type="button" class="btn btn-danger" ng-click="vm.deleteRecord(person.id)">
-                            <i class="glyphicon glyphicon-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<ng-include src="'views/system/sidebar.html'"></ng-include>
+<h2>User management</h2>
+<div class="row well">
+    <button type="button" class="btn btn-info pull-right" ng-click="vm.addRecord()">
+        <i class="glyphicon glyphicon-plus"></i> Add New Employee</button>
 </div>
+<table class="table table-hover table-bordered">
+    <thead>
+        <tr>
+            <th class="col-sm-2">Firstname</th>
+            <th class="col-sm-2">Lastname</th>
+            <th class="col-sm-3">Username</th>
+            <th class="col-sm-3">Email</th>
+            <th class="col-sm-2">Management</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="person in vm.persons">
+            <td>{{person.firstname}}</td>
+            <td>{{person.lastname}}</td>
+            <td>{{person.username}}</td>
+            <td>{{person.email}}</td>
+            <td class="">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-info" ng-click="vm.viewRecord(person.id)">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="vm.editRecord(person.id)">
+                        <i class="glyphicon glyphicon-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" ng-click="vm.deleteRecord(person.id)">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
