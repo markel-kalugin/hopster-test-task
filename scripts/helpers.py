@@ -205,3 +205,55 @@ class ProductCategory(object):
         return result
 
 
+class Product(object):
+    def save_product(self, price, description, company_brand, product_category):
+        product = ProductModel(
+            brand=CompanyBrandsModel.get_by_id(long(company_brand['id'])),
+            category=RefProductCategoriesModel.get_by_id(long(product_category['id']))
+        )
+        product.price = price
+        product.description = description
+        product.put()
+
+    def update_product(self, price, description, company_brand, product_category, id):
+        product = ProductModel.get_by_id(long(id))
+        product.brand = CompanyBrandsModel.get_by_id(long(company_brand['id']))
+        product.category = RefProductCategoriesModel.get_by_id(long(product_category['id']))
+        product.price = price
+        product.description = description
+        product.put()
+
+    def delete_product(self, id):
+        if id > 0:
+            product_key = db.Key.from_path('ProductModel', long(id))
+            db.delete(product_key)
+            return True
+        else:
+            return False
+
+    def get_product_by_id(self, id):
+        product = ProductModel.get_by_id(long(id))
+        result = {
+            'id': product.key().id_or_name(),
+            'price': product.price,
+            'description': product.description,
+            'category': product.category.name,
+            'brand': product.brand.name,
+        }
+        return result
+
+    def list_product(self):
+        result = []
+        products = ProductModel.all()
+        for product in products:
+            result.append(
+                {
+                    'id': product.key().id_or_name(),
+                    'price': product.price,
+                    'description': product.description,
+                    'category': product.category.name,
+                    'brand': product.brand.name,
+                }
+            )
+        return result
+
