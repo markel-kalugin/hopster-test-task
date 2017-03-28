@@ -112,3 +112,49 @@ class Company(object):
         return result
 
 
+class CompanyBrands(object):
+    def save_company_brand(self, name, company):
+        company_brand = CompanyBrandsModel(
+            company=CompanyModel.get_by_id(long(company['id']))
+        )
+        company_brand.name = name
+        company_brand.put()
+
+    def update_company_brand(self, name, company, id):
+        company_brand = CompanyBrandsModel.get_by_id(long(id))
+        company_brand.company = CompanyModel.get_by_id(long(company['id']))
+        company_brand.name = name
+        company_brand.put()
+
+    def delete_company_brand(self, id):
+        if id > 0:
+            company_brand_key = db.Key.from_path('CompanyBrandsModel', long(id))
+            db.delete(company_brand_key)
+            return True
+        else:
+            return False
+
+    def get_company_brand_by_id(self, id):
+        company_brand = CompanyBrandsModel.get_by_id(long(id))
+        result = {
+            'id': company_brand.key().id_or_name(),
+            'name': company_brand.name,
+            'company': company_brand.company.name,
+        }
+        return result
+
+    def list_company_brand(self):
+        result = []
+        company_brands = CompanyBrandsModel.all()
+        for company_brand in company_brands:
+            result.append(
+                {
+                    'id': company_brand.key().id_or_name(),
+                    'name': company_brand.name,
+                    'company': company_brand.company.name,
+                }
+            )
+        import logging
+        logging.info('{}'.format(result))
+        return result
+
