@@ -52,7 +52,7 @@ function Controller(UserService, $location, $scope, $rootScope, FlashService, $u
             scope: $scope,
             size: '',
             resolve: {
-                whenClosing: function () {
+                getEntityList: function () {
                     return init;
                 }
             }
@@ -74,7 +74,7 @@ function Controller(UserService, $location, $scope, $rootScope, FlashService, $u
                             record: function () {
                                 return data.body;
                             },
-                            whenClosing: function () {
+                            getEntityList: function () {
                                 return init;
                             }
                         }
@@ -125,7 +125,7 @@ angular
     .module('app')
     .controller('User.AddRecordController', AddRecordController);
 
-function AddRecordController(UserService, FlashService, $scope, $http, whenClosing, $uibModalStack) {
+function AddRecordController(UserService, FlashService, $scope, $http, getEntityList, $uibModalStack) {
     $scope.savePerson = function () {
         $scope.datas = {};
 
@@ -159,16 +159,16 @@ function AddRecordController(UserService, FlashService, $scope, $http, whenClosi
         UserService.create($scope.datas, function (data) {
             if (data['status'] === 'OK') {
                 FlashService.Success('User successfully created', true);
+                getEntityList();
             } else {
                 FlashService.Error(data['error_message']);
             }
         });
-        whenClosing();
         $uibModalStack.dismissAll();
     };
 
     $scope.closeModal = function () {
-        whenClosing();
+        getEntityList();
         $uibModalStack.dismissAll();
     };
 
@@ -179,7 +179,7 @@ angular
     .module('app')
     .controller('User.EditRecordController', EditRecordController);
 
-function EditRecordController(UserService, FlashService, $scope, $http, record, whenClosing, $uibModalStack) {
+function EditRecordController(UserService, FlashService, $scope, $http, record, getEntityList, $uibModalStack) {
     $scope.person = {};
     function init() {
         $scope.person.id = record.id;
@@ -215,16 +215,16 @@ function EditRecordController(UserService, FlashService, $scope, $http, record, 
         UserService.update($scope.person, function (data) {
             if (data['status'] === 'OK') {
                 FlashService.Success('User successfully updated', true);
+                getEntityList();
             } else {
                 FlashService.Error(data['error_message']);
             }
         });
-        whenClosing();
         $uibModalStack.dismissAll();
     };
 
     $scope.closeModal = function () {
-        whenClosing();
+        getEntityList();
         $uibModalStack.dismissAll();
     };
 
