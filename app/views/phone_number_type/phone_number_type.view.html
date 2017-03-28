@@ -1,0 +1,34 @@
+<ng-include src="'views/system/sidebar.html'"></ng-include>
+<h2>Phone Numbers Types</h2>
+<div class="row well">
+    <button type="button" class="btn btn-info pull-right" ng-click="vm.addRecord()">
+        <i class="glyphicon glyphicon-plus"></i> Add Phone Number Type</button>
+</div>
+<table class="table table-hover table-bordered">
+    <thead>
+        <tr>
+            <th class="col-sm-2">Name</th>
+            <th class="col-sm-3">Description</th>
+            <th class="col-sm-2">Management</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="phone_number_type in vm.phone_number_type">
+            <td>{{phone_number_type.name}}</td>
+            <td>{{phone_number_type.description}}</td>
+            <td class="">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-info" ng-click="vm.viewRecord(phone_number_type.id)">
+                        <i class="glyphicon glyphicon-search"></i>
+                    </button>
+                    <button type="button" class="btn btn-default" ng-click="vm.editRecord(phone_number_type.id)">
+                        <i class="glyphicon glyphicon-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" ng-click="vm.deleteRecord(phone_number_type.id)">
+                        <i class="glyphicon glyphicon-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
