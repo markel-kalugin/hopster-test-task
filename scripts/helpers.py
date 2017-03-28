@@ -158,3 +158,50 @@ class CompanyBrands(object):
         logging.info('{}'.format(result))
         return result
 
+
+class ProductCategory(object):
+    def save_product_category(self, name, description):
+        product_category = RefProductCategoriesModel()
+        product_category.name = name
+        product_category.description = description
+        product_category.put()
+
+    def update_product_category(self, name, description, id):
+        product_category = RefProductCategoriesModel().get_by_id(long(id))
+        product_category.name = name
+        product_category.description = description
+        product_category.put()
+
+    def delete_product_category(self, id):
+        if id > 0:
+            product_category_key = db.Key.from_path('RefProductCategoriesModel', long(id))
+            db.delete(product_category_key)
+            return True
+        else:
+            return False
+
+    def get_product_category_by_id(self, id):
+        product_category = RefProductCategoriesModel.get_by_id(long(id))
+        result = {
+            'id': product_category.key().id_or_name(),
+            'name': product_category.name,
+            'description': product_category.description,
+            'products': [brand.name for brand in
+                         ProductModel.all().filter('product_category = ', product_category.key())]
+        }
+        return result
+
+    def list_product_category(self):
+        result = []
+        product_categories = RefProductCategoriesModel.all()
+        for product_category in product_categories:
+            result.append(
+                {
+                    'id': product_category.key().id_or_name(),
+                    'name': product_category.name,
+                    'description': product_category.description,
+                }
+            )
+        return result
+
+
