@@ -1,5 +1,4 @@
 import webapp2
-import logging
 import json
 
 from scripts.handlers import (
@@ -16,7 +15,10 @@ def handle_error(request, response, exception):
     response.write(json.dumps(result))
 
 config = {
-    'webapp2_extras.sessions': {'secret_key': 'my_secret'}
+    'webapp2_extras.sessions': {
+        'secret_key': 'my_secret',
+        'expiration_time': 1800  # 30 minutes
+    },
 }
 
 application = webapp2.WSGIApplication([
