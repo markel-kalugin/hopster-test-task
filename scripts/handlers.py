@@ -1,15 +1,20 @@
+from google.appengine.api import memcache
+import json
+import jwt
 import logging
+import time
 import webapp2
-from webapp2_extras import sessions
 from helpers import (
     Person, Company, CompanyBrands, ProductCategory, Product, PhoneNumberType, Manufacturer
 )
-import json
-import jwt
-import time
 
 
-class BaseHandler(webapp2.RedirectHandler):
+class AuthenticationRequiredException(Exception):
+    def __init__(self, mismatch):
+        Exception.__init__(self, mismatch)
+
+
+class BaseHandler(webapp2.RequestHandler):
     """
     It is necessary to redefine the parameters of responses.
     """
@@ -32,24 +37,7 @@ class BaseHandler(webapp2.RedirectHandler):
                                                                 'Access-Control-Request-Headers'
         self.response.headers['Access-Control-Max-Age'] = '3600'
         self.response.headers['Content-Type'] = 'application/json'
-
-        self.session_store = sessions.get_store(request=self.request)
-        try:
-            # Dispatch the request.
-            super(BaseHandler, self).dispatch()
-        finally:
-            # Save all sessions.
-            self.session_store.save_sessions(self.response)
-
-    @webapp2.cached_property
-    def session(self):
-        """
-        Returns a session using the default cookie key.
-
-        :return: None
-        :rtype: None
-        """
-        return self.session_store.get_session()
+        super(BaseHandler, self).dispatch()
 
     def response_factory(self, status='OK', body=None, status_code=200, error_message=None):
         """
@@ -97,6 +85,13 @@ class AuthenticationHandler(BaseHandler):
                 self.app.config.get('webapp2_extras.sessions')['secret_key'],
                 algorithm='HS256'
             )
+
+            memcache.add(
+                key=token,
+                value=(params['username'], person.encrypt_password(params['password'])),
+                time=self.app.config.get('webapp2_extras.sessions')['expiration_time']
+            )
+
             logging.info('User with username {} was authenticated'.format(params['username']))
             self.response_factory(
                 body=token
@@ -115,6 +110,23 @@ class CRUDHandler(BaseHandler):
     are assembled in this class to reduce the lines of code.
     """
 
+    def request_validator(self):
+        if 'Authorization' in self.request.headers.keys():
+            handler_authorization = self.request.headers['Authorization']
+            token = handler_authorization[7:]
+            data = memcache.get(token)
+            if data is not None:
+                memcache.delete(token)
+                memcache.add(
+                    key=token,
+                    value=data,
+                    time=self.app.config.get('webapp2_extras.sessions')['expiration_time']
+                )
+            else:
+                raise AuthenticationRequiredException('Authentication required')
+        else:
+            raise AuthenticationRequiredException('Authentication required')
+
     def get_handler(self, class_helper):
         """
         Wrapper for HTTP request handler with method GET was created for upping of abstract level.
@@ -124,6 +136,7 @@ class CRUDHandler(BaseHandler):
         :rtype: None
         """
         try:
+            self.request_validator()
             if self.request.get('id'):
                 self.response_factory(
                     body=class_helper().get_by_id(self.request.get('id'))
@@ -145,6 +158,12 @@ class CRUDHandler(BaseHandler):
                 status_code=407,
                 error_message=e.message
             )
+        except AuthenticationRequiredException as e:
+            self.response_factory(
+                status='error',
+                status_code=403,
+                error_message=e.message
+            )
 
     def post_handler(self, class_helper):
         """
@@ -155,6 +174,7 @@ class CRUDHandler(BaseHandler):
         :rtype: None
         """
         try:
+            self.request_validator()
             params = json.loads(self.request.body)
             entity = class_helper()
             entity.save(**params)
@@ -168,6 +188,12 @@ class CRUDHandler(BaseHandler):
                 status_code=407,
                 error_message=e.message
             )
+        except AuthenticationRequiredException as e:
+            self.response_factory(
+                status='error',
+                status_code=403,
+                error_message=e.message
+            )
 
     def put_handler(self, class_helper):
         """
@@ -178,6 +204,7 @@ class CRUDHandler(BaseHandler):
         :rtype: None
         """
         try:
+            self.request_validator()
             params = json.loads(self.request.body)
             entity = class_helper()
             entity.update(**params)
@@ -191,6 +218,12 @@ class CRUDHandler(BaseHandler):
                 status_code=407,
                 error_message=e.message
             )
+        except AuthenticationRequiredException as e:
+            self.response_factory(
+                status='error',
+                status_code=403,
+                error_message=e.message
+            )
 
     def delete_handler(self, class_helper):
         """
@@ -201,6 +234,7 @@ class CRUDHandler(BaseHandler):
         :rtype: None
         """
         try:
+            self.request_validator()
             if self.request.get('id'):
                 self.response_factory(
                     body=class_helper().delete(self.request.get('id'))
@@ -212,6 +246,12 @@ class CRUDHandler(BaseHandler):
             self.response_factory(
                 status='error',
                 status_code=407,
+                error_message=e.message
+            )
+        except AuthenticationRequiredException as e:
+            self.response_factory(
+                status='error',
+                status_code=403,
                 error_message=e.message
             )
 
