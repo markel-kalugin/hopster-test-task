@@ -1,5 +1,5 @@
-import webapp2
 import json
+import webapp2
 
 from scripts.handlers import (
     AuthenticationHandler, UserManagementHandler, CompanyHandler, CompanyBrandHandler,
