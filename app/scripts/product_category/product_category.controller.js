@@ -6,14 +6,19 @@ angular
     .module('app')
     .controller('ProductCategory.IndexController', Controller);
 
-function Controller(ProductCategoryService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
+function Controller(AuthenticationService, ProductCategoryService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
     var vm = this;
     var modalInstance = null;
-    
+
     var init = function () {
         ProductCategoryService.get(function (data) {
             if (data['status'] === 'OK') {
                 vm.product_category = data.body;
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -36,6 +41,11 @@ function Controller(ProductCategoryService, $location, $scope, $rootScope, Flash
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -77,6 +87,11 @@ function Controller(ProductCategoryService, $location, $scope, $rootScope, Flash
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -89,6 +104,11 @@ function Controller(ProductCategoryService, $location, $scope, $rootScope, Flash
             ProductCategoryService.remove({id: id}, function (data) {
                 if (data['status'] === 'OK') {
                     init();
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -141,6 +161,11 @@ function AddRecordController(ProductCategoryService, FlashService, $scope, $http
         ProductCategoryService.create($scope.datas, function (data) {
             if (data['status'] === 'OK') {
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -181,6 +206,11 @@ function EditRecordController(ProductCategoryService, FlashService, $scope, $htt
         ProductCategoryService.update($scope.product_category, function (data) {
             if (data['status'] === 'OK') {
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }

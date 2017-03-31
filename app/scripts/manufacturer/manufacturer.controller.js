@@ -6,13 +6,18 @@ angular
     .module('app')
     .controller('Manufacturer.IndexController', Controller);
 
-function Controller(ProductService, PhoneNumberTypeService, ManufacturerService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
+function Controller(AuthenticationService, ProductService, PhoneNumberTypeService, ManufacturerService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
     var vm = this;
     var modalInstance = null;
 
     ProductService.get(function (data) {
         if (data['status'] === 'OK') {
             vm.products = data.body;
+        } else if (data['status'] === 'error' ||
+            data['error_message'] === 'Authentication required' ||
+            data['status_code'] === '403') {
+            AuthenticationService.Logout();
+            FlashService.Error(data['error_message']);
         } else {
             FlashService.Error(data['error_message']);
         }
@@ -21,6 +26,11 @@ function Controller(ProductService, PhoneNumberTypeService, ManufacturerService,
     PhoneNumberTypeService.get(function (data) {
         if (data['status'] === 'OK') {
             vm.phone_number_types = data.body;
+        } else if (data['status'] === 'error' ||
+            data['error_message'] === 'Authentication required' ||
+            data['status_code'] === '403') {
+            AuthenticationService.Logout();
+            FlashService.Error(data['error_message']);
         } else {
             FlashService.Error(data['error_message']);
         }
@@ -30,6 +40,11 @@ function Controller(ProductService, PhoneNumberTypeService, ManufacturerService,
         ManufacturerService.get(function (data) {
             if (data['status'] === 'OK') {
                 vm.manufacturers = data.body;
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -58,6 +73,11 @@ function Controller(ProductService, PhoneNumberTypeService, ManufacturerService,
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -111,6 +131,11 @@ function Controller(ProductService, PhoneNumberTypeService, ManufacturerService,
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -123,6 +148,11 @@ function Controller(ProductService, PhoneNumberTypeService, ManufacturerService,
             ManufacturerService.remove({id: id}, function (data) {
                 if (data['status'] === 'OK') {
                     init();
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -187,6 +217,11 @@ function AddRecordController(ManufacturerService, FlashService, $scope, $http, g
         ManufacturerService.create($scope.datas, function (data) {
             if (data['status'] === 'OK') {
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -239,6 +274,11 @@ function EditRecordController(ManufacturerService, FlashService, $scope, $http, 
         ManufacturerService.update($scope.manufacturer, function (data) {
             if (data['status'] === 'OK') {
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
