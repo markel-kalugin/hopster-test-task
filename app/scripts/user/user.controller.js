@@ -6,14 +6,18 @@ angular
     .module('app')
     .controller('User.IndexController', Controller);
 
-function Controller(UserService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
+function Controller(AuthenticationService, UserService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
     var vm = this;
     var modalInstance = null;
     var init = function () {
         UserService.get(function (data) {
             if (data['status'] === 'OK') {
-                FlashService.Success('Got a list of users', true);
                 vm.persons = data.body;
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -37,6 +41,11 @@ function Controller(UserService, $location, $scope, $rootScope, FlashService, $u
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -79,6 +88,11 @@ function Controller(UserService, $location, $scope, $rootScope, FlashService, $u
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -92,6 +106,11 @@ function Controller(UserService, $location, $scope, $rootScope, FlashService, $u
                 if (data['status'] === 'OK') {
                     FlashService.Success('Got a list of users', true);
                     init();
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -160,6 +179,11 @@ function AddRecordController(UserService, FlashService, $scope, $http, getEntity
             if (data['status'] === 'OK') {
                 FlashService.Success('User successfully created', true);
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -216,6 +240,11 @@ function EditRecordController(UserService, FlashService, $scope, $http, record, 
             if (data['status'] === 'OK') {
                 FlashService.Success('User successfully updated', true);
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }

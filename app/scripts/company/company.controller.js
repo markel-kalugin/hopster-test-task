@@ -6,13 +6,18 @@ angular
     .module('app')
     .controller('Company.IndexController', Controller);
 
-function Controller(CompanyService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
+function Controller(AuthenticationService, CompanyService, $location, $scope, $rootScope, FlashService, $uibModal, $log) {
     var vm = this;
     var modalInstance = null;
     var init = function () {
         CompanyService.get(function (data) {
             if (data['status'] === 'OK') {
                 vm.company = data.body;
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -35,6 +40,11 @@ function Controller(CompanyService, $location, $scope, $rootScope, FlashService,
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -76,6 +86,11 @@ function Controller(CompanyService, $location, $scope, $rootScope, FlashService,
                             }
                         }
                     });
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -88,6 +103,11 @@ function Controller(CompanyService, $location, $scope, $rootScope, FlashService,
             CompanyService.remove({id: id}, function (data) {
                 if (data['status'] === 'OK') {
                     init();
+                } else if (data['status'] === 'error' ||
+                    data['error_message'] === 'Authentication required' ||
+                    data['status_code'] === '403') {
+                    AuthenticationService.Logout();
+                    FlashService.Error(data['error_message']);
                 } else {
                     FlashService.Error(data['error_message']);
                 }
@@ -140,6 +160,11 @@ function AddRecordController(CompanyService, FlashService, $scope, $http, getEnt
         CompanyService.create($scope.datas, function (data) {
             if (data['status'] === 'OK') {
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
@@ -180,6 +205,11 @@ function EditRecordController(CompanyService, FlashService, $scope, $http, recor
         CompanyService.update($scope.company, function (data) {
             if (data['status'] === 'OK') {
                 getEntityList();
+            } else if (data['status'] === 'error' ||
+                data['error_message'] === 'Authentication required' ||
+                data['status_code'] === '403') {
+                AuthenticationService.Logout();
+                FlashService.Error(data['error_message']);
             } else {
                 FlashService.Error(data['error_message']);
             }
